@@ -1,0 +1,38 @@
+CHANGELOG - Envio Auto Dilix V1.20
+
+📆 Atualizado em: 20 de Agosto de 2025
+👨‍💻 Desenvolvido por: Hudson Mesquita Souza
+
+🆕 Novidades / Funcionalidades adicionadas
+
+✅ Spinner animado durante envio em lote
+
+Adicionada uma animação de “carregando...” com ícones giratórios enquanto os e-mails são processados.
+
+Feedback visual imediato assim que o botão é clicado.
+
+✅ Botão “Enviar em Lote” é desativado durante o envio
+
+Previne múltiplos cliques acidentais ou envios duplicados.
+
+✅ Barra de progresso agora reseta corretamente após término
+
+Mesmo em casos de falha parcial, a barra é redefinida para zero após exibição do resumo.
+
+✅ Melhoria na usabilidade da lista de clientes
+
+O modo de seleção do Listbox foi alterado de "multiple" para "extended", permitindo:
+
+Seleção única com clique normal.
+
+Seleção múltipla com Ctrl.
+
+Seleção em bloco com Shift.
+
+Corrige comportamento confuso ao selecionar/deselecionar clientes na lista.
+
+🛠️ Correções
+
+🐛 Corrigido: barra de progresso travada após falhas no envio em lote.
+
+🐛 Corrigido: experiência de usuário inconsistente ao selecionar clientes para envio múltiplo.
