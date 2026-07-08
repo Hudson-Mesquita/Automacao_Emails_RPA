@@ -7,8 +7,8 @@ import yagmail
 import threading
 
 # === CONFIG INICIAIS ===
-SEU_EMAIL = "d..... classified"
-SENHA_APP = "h..... classified"
+SEU_EMAIL = "d.... classified"
+SENHA_APP = "hz.... classified"
 
 COL_EMPRESA = "Empresa"
 COL_EMAILS = "E-mails"
@@ -145,21 +145,21 @@ def enviar_email_cliente():
                 assunto = f"Nota Fiscal e Boleto – {empresa}"
                 corpo = (
                     "Prezados,\n\n"
-                    "Segue em anexo, nota fiscal e boleto bancário para pagamento referente a prestação de serviços de coleta.\n\n"
+                    "Segue em anexo, nota fiscal e boleto bancário para pagamento referente a prestação de serviços .\n\n"
                     "Colocamo-nos à disposição.\n\nAtenciosamente,"
                 )
             elif tipo_envio == "nf":
                 assunto = f"Nota Fiscal – {empresa}"
                 corpo = (
                     "Prezados,\n\n"
-                    "Segue em anexo, nota fiscal referente a prestação de serviços de coleta.\n\n"
+                    "Segue em anexo, nota fiscal referente a prestação de serviços.\n\n"
                     "Colocamo-nos à disposição.\n\nAtenciosamente,"
                 )
             elif tipo_envio == "boleto":
                 assunto = f"Boleto – {empresa}"
                 corpo = (
                     "Prezados,\n\n"
-                    "Segue em anexo, boleto bancário para pagamento referente a prestação de serviços de coleta.\n\n"
+                    "Segue em anexo, boleto bancário para pagamento referente a prestação de serviços.\n\n"
                     "Colocamo-nos à disposição.\n\nAtenciosamente,"
                 )
             else:
@@ -183,6 +183,109 @@ def enviar_email_cliente():
 
     # Roda o envio em uma thread separada
     threading.Thread(target=enviar).start()
+
+def enviar_em_lote():
+    selecionados = lista_clientes.curselection()
+    if not selecionados:
+        messagebox.showwarning("Aviso", "Selecione ao menos um cliente.")
+        return
+    if not pasta_mes_atual:
+        messagebox.showerror("Erro", "Defina a pasta do mês primeiro.")
+        return
+
+    total = len(selecionados)
+    progresso["maximum"] = total
+    progresso["value"] = 0
+
+    def enviar_todos():
+        enviados = []
+        erros = []
+
+        for i, idx in enumerate(selecionados):
+            try:
+                linha = df.iloc[idx]
+                empresa = linha[COL_EMPRESA]
+                emails_raw = str(linha[COL_EMAILS])
+                nome_pasta = linha[COL_PASTA]
+                tipo_envio = linha[COL_TIPO_ENVIO].strip().lower()
+
+                emails = [e.strip() for e in emails_raw.replace(";", ",").split(",") if e.strip()]
+                caminho_empresa = os.path.join(pasta_mes_atual, nome_pasta)
+
+                if not os.path.isdir(caminho_empresa):
+                    erros.append(f"{empresa}: Pasta '{nome_pasta}' não encontrada.")
+                    continue
+
+                arquivos_pdf = [
+                    os.path.join(caminho_empresa, f)
+                    for f in os.listdir(caminho_empresa)
+                    if f.lower().endswith(".pdf")
+                ]
+
+                if not arquivos_pdf:
+                    erros.append(f"{empresa}: Nenhum PDF encontrado.")
+                    continue
+
+                anexos = []
+                for arquivo in arquivos_pdf:
+                    nome_arquivo = os.path.basename(arquivo).lower()
+                    if tipo_envio == "ambos":
+                        anexos.append(arquivo)
+                    elif tipo_envio == "nf" and "nf" in nome_arquivo:
+                        anexos.append(arquivo)
+                    elif tipo_envio == "boleto" and "boleto" in nome_arquivo:
+                        anexos.append(arquivo)
+
+                if not anexos:
+                    erros.append(f"{empresa}: Nenhum anexo do tipo '{tipo_envio}' encontrado.")
+                    continue
+
+                if tipo_envio == "ambos":
+                    assunto = f"Nota Fiscal e Boleto – {empresa}"
+                    corpo = (
+                        "Prezados,\n\n"
+                        "Segue em anexo, nota fiscal e boleto bancário para pagamento referente a prestação de serviços .\n\n"
+                        "Colocamo-nos à disposição.\n\nAtenciosamente,"
+                    )
+                elif tipo_envio == "nf":
+                    assunto = f"Nota Fiscal – {empresa}"
+                    corpo = (
+                        "Prezados,\n\n"
+                        "Segue em anexo, nota fiscal referente a prestação de serviços .\n\n"
+                        "Colocamo-nos à disposição.\n\nAtenciosamente,"
+                    )
+                elif tipo_envio == "boleto":
+                    assunto = f"Boleto – {empresa}"
+                    corpo = (
+                        "Prezados,\n\n"
+                        "Segue em anexo, boleto bancário para pagamento referente a prestação de serviços.\n\n"
+                        "Colocamo-nos à disposição.\n\nAtenciosamente,"
+                    )
+                else:
+                    erros.append(f"{empresa}: Tipo de envio inválido '{tipo_envio}'.")
+                    continue
+
+                yag = yagmail.SMTP(SEU_EMAIL, SENHA_APP)
+                yag.send(to=emails, subject=assunto, contents=corpo, attachments=anexos)
+
+                enviados.append(empresa)
+
+            except Exception as e:
+                erros.append(f"{empresa}: Erro ao enviar – {e}")
+
+            progresso["value"] += 1
+            root.update()
+
+        resumo = f"E-mails enviados com sucesso: {len(enviados)}\n"
+        resumo += "\n".join([f"✔ {nome}" for nome in enviados])
+        if erros:
+            resumo += f"\n\nOcorreram {len(erros)} erro(s):\n"
+            resumo += "\n".join([f"✖ {e}" for e in erros])
+
+        root.after(0, lambda: messagebox.showinfo("Resumo do Envio", resumo))
+
+    threading.Thread(target=enviar_todos).start()
+
 
 root = tk.Tk()
 root.title("Envio Automático de E-mails Dilix")
@@ -218,15 +321,21 @@ tk.Button(aba_config, text="Carregar Clientes da Planilha", command=carregar_cli
 
 # Aba Principal
 tk.Label(aba_principal, text="Selecione uma empresa:").pack(pady=5)
-lista_clientes = tk.Listbox(aba_principal, width=90, height=20)
+lista_clientes = tk.Listbox(aba_principal, width=90, height=20, selectmode=tk.MULTIPLE)
 lista_clientes.pack(pady=10)
+tk.Button(aba_principal, text="Enviar E-mail em lote", command=enviar_em_lote).pack(pady=5)
+
+
 
 tk.Button(aba_principal, text="Enviar E-mail para Selecionado", command=enviar_email_cliente).pack(pady=10)
-label_creditos = tk.Label(root, text="Desenvolvido por Hudson Mesquita Souza - 2025                  Envio Auto V1.15", font=("Arial", 9), fg="gray")
+label_creditos = tk.Label(root, text="Desenvolvido por Hudson Mesquita Souza - 2025                  Envio Auto Dilix V1.18", font=("Arial", 9), fg="gray")
 label_creditos.pack(side=tk.BOTTOM, pady=5)
+
+
 # === Carrega CONFIG no início ===
 carregar_config()
 entrada_planilha.insert(0, config.get("planilha", ""))
 entrada_pasta.insert(0, config.get("pasta_raiz", ""))
 
 root.mainloop()
+
