@@ -1,38 +1,35 @@
-CHANGELOG - Envio Auto Dilix V1.20
+📝 Changelog – Versão 1.22
 
-📆 Atualizado em: 20 de Agosto de 2025
-👨‍💻 Desenvolvido por: Hudson Mesquita Souza
+Data de lançamento: 20/08/2025
+Desenvolvedor: Hudson Mesquita Souza
 
-🆕 Novidades / Funcionalidades adicionadas
+✨ Novidades:
 
-✅ Spinner animado durante envio em lote
+[NOVO] Adição de clientes via interface
+Agora é possível adicionar novos clientes diretamente pelo app, sem precisar editar a planilha manualmente.
 
-Adicionada uma animação de “carregando...” com ícones giratórios enquanto os e-mails são processados.
+Nova janela para inserir:
 
-Feedback visual imediato assim que o botão é clicado.
+Nome da empresa
 
-✅ Botão “Enviar em Lote” é desativado durante o envio
+E-mail(s)
 
-Previne múltiplos cliques acidentais ou envios duplicados.
+Nome da pasta
 
-✅ Barra de progresso agora reseta corretamente após término
+Tipo de envio (boleto, nf ou ambos)
 
-Mesmo em casos de falha parcial, a barra é redefinida para zero após exibição do resumo.
+Validação de campos obrigatórios
 
-✅ Melhoria na usabilidade da lista de clientes
+Atualização automática da lista de clientes após inserção
 
-O modo de seleção do Listbox foi alterado de "multiple" para "extended", permitindo:
+🛠️ Ajustes e melhorias internas:
 
-Seleção única com clique normal.
+Melhoria na organização do código para permitir expansão futura.
 
-Seleção múltipla com Ctrl.
+Estrutura preparada para possíveis validações adicionais (ex: checagem de e-mail ou duplicidade de cliente).
 
-Seleção em bloco com Shift.
+📌 Observações:
 
-Corrige comportamento confuso ao selecionar/deselecionar clientes na lista.
+A nova função requer que uma planilha esteja selecionada previamente.
 
-🛠️ Correções
-
-🐛 Corrigido: barra de progresso travada após falhas no envio em lote.
-
-🐛 Corrigido: experiência de usuário inconsistente ao selecionar clientes para envio múltiplo.
+Os dados são salvos diretamente no arquivo Excel definido na aba de configurações.
